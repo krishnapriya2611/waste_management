@@ -1,26 +1,40 @@
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
-
+from datetime import datetime
 
 def add_waste():
-    date = input("Date (dd/mm/yy): ")
-    item = input("Item name: ")
-    category = input("Plastic/Organic/Paper/Metal: ")
-    weight = float(input("Weight in kg: "))
+    while True:
+        while True:
+            date = input("Date (dd/mm/yy): ")
+            try:
+                datetime.strptime(date, "%d/%m/%y")
+                break
+            except ValueError:
+                print("Invalid date format. Use dd/mm/yy.")
+        item = input("Item name: ")
+        category = input("Plastic/Organic/Paper/Metal: ")
+        weight = float(input("Weight in kg: "))
 
-    new_entry = pd.DataFrame(
-        [[date, item, category, weight]],
-        columns=["Date", "Item", "Category", "Weight"]
-    )
+        new_entry = pd.DataFrame(
+            [[date, item, category, weight]],
+            columns=["Date", "Item", "Category", "Weight"]
+        )
 
-    if os.path.exists("waste_data.csv"):
-        new_entry.to_csv("waste_data.csv", mode="a", header=False, index=False)
-    else:
-        new_entry.to_csv("waste_data.csv", index=False)
+        if os.path.exists("waste_data.csv"):
+            new_entry.to_csv("waste_data.csv", mode="a", header=False, index=False)
+        else:
+            new_entry.to_csv("waste_data.csv", index=False)
 
-    print("Waste added successfully!\n")
+        print("Waste added successfully!\n")
 
+        more = input("Add another entry? (continue/stop): ").lower()
+        if more == "continue":
+            return
+        elif more=="stop":
+            break
+        else:
+            print("enter from given options")
 
 def suggest_reduction(category_totals):
     highest = category_totals.idxmax().lower()
@@ -66,13 +80,7 @@ while True:
 
         print("\nSuggestion:")
         print(suggest_reduction(category_totals))
-
-        plt.figure()
-        category_totals.plot(kind="bar")
-        plt.title("Waste Distribution")
-        plt.xlabel("Category")
-        plt.ylabel("Weight (kg)")
-
+        
         plt.figure()
         category_totals.plot(kind="pie", autopct="%1.1f%%")
         plt.title("Waste Percentage")
