@@ -80,13 +80,38 @@ while True:
 
         print("\nSuggestion:")
         print(suggest_reduction(category_totals))
-        
+
+        df["Date"] = pd.to_datetime(df["Date"], format="%d/%m/%y")
+        df["Week"] = df["Date"].dt.isocalendar().week
+        weekly = df.groupby("Week")["Weight"].sum().sort_index()
+        print("\nWeekly Waste:")
+        print(weekly)
+        print("\nWeekly Trends:")
+        weeks = list(weekly.index)
+        if len(weekly) >= 2:
+            for i in range(1, len(weeks)):
+                if weeks[i] - weeks[i-1] == 1:
+                    prev = weekly.iloc[i-1]
+                    curr = weekly.iloc[i]
+                if prev != 0:
+                    change = ((curr - prev) / prev) * 100
+
+                    if change > 0:
+                        print(f"Week {weeks[i-1]} → Week {weeks[i]}: +{change:.2f}%")
+                    else:
+                        print(f"Week {weeks[i-1]} → Week {weeks[i]}: {change:.2f}%")
+            else:
+                print(f"Week {weeks[i-1]} → Week {weeks[i]}: skipped (gap)")
+        else:
+           print("Not enough data for trend")
+
         plt.figure()
         category_totals.plot(kind="pie", autopct="%1.1f%%")
         plt.title("Waste Percentage")
         plt.ylabel("")
 
         plt.show()
+
 
     elif choice == "3":
         break
